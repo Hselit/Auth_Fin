@@ -1,12 +1,9 @@
-const { authenticate } = require('passport');
+const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
-const collection = require('./schema');
+const collection = require('../models/schema');
 
-const passport = require('passport');
-const flash = require('express-flash');
-const session = require('express-session');
-function initialize(passport) {
+function initialize(passportInstance) {
     const authenticateUser = async (username, password, done) => {
         try {
             const user = await collection.findOne({ username: username });
@@ -24,11 +21,11 @@ function initialize(passport) {
         }
     };
 
-    passport.use(new LocalStrategy({ usernameField: 'username' }, authenticateUser));
-    passport.serializeUser((user, done) => {
+    passportInstance.use(new LocalStrategy({ usernameField: 'username' }, authenticateUser));
+    passportInstance.serializeUser((user, done) => {
         done(null, user.id);
     });
-    passport.deserializeUser(async (_id, done) => {
+    passportInstance.deserializeUser(async (_id, done) => {
         try {
             const user = await collection.findById(_id);
             done(null, user);
